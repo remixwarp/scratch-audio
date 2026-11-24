@@ -2575,6 +2575,18 @@ return {SonoraApp};
   var sharedWav=null, sharedName='', loaded={}, ready={};
   var exportTimer=0, syncTimer=0, wavVersion=0, lastInjected={pulsegrid:0,sonora:0}, lastExportedVersion=0;
 
+  // Inline seed: the host may embed the current Scratch sound directly in this
+  // document as base64 (window.__RW_SEED_WAV__). Decode it synchronously at
+  // startup so the sound is available regardless of postMessage/ready timing.
+  try{
+    if(window.__RW_SEED_WAV__){
+      var _bin=atob(window.__RW_SEED_WAV__), _u=new Uint8Array(_bin.length);
+      for(var _i=0;_i<_bin.length;_i++) _u[_i]=_bin.charCodeAt(_i);
+      sharedWav=_u.buffer; sharedName='scratch-sound.wav'; wavVersion++;
+    }
+  }catch(e){}
+  delete window.__RW_SEED_WAV__;
+
   function frames(){ return {pulsegrid:pg, sonora:so}; }
   function setSync(busy,text){ syncEl.classList.toggle('busy',!!busy); syncText.textContent=text||(busy?'Syncing…':'Synced'); }
 
