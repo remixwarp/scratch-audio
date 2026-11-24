@@ -689,7 +689,7 @@ return {};
           if (!decoded) return false;
           var pg = window.pulsegrid;
           if (!pg) return false;
-          suppressNotify = Date.now() + 4000;
+          suppressNotify = Date.now() + 1500;
           var asset = {
             id: 'sync-' + Date.now() + '-' + Math.floor(Math.random() * 1e6),
             name: name, sampleRate: decoded.sampleRate, frames: decoded.frames,
@@ -735,7 +735,7 @@ return {};
         var dt = new DataTransfer(); dt.items.add(file);
         var input2 = document.getElementById('file-input');
         if (!input2) return Promise.resolve(false);
-        suppressNotify = Date.now() + 5000;
+        suppressNotify = Date.now() + 2000;
         input2.files = dt.files;
         input2.dispatchEvent(new Event('change', {bubbles: true}));
         return new Promise(function (resolve) {
@@ -764,18 +764,43 @@ return {};
     });
   }
 
+  // Content fingerprint of the audio that currentWav() would export.
+  // Essential for two-way sync: editing waveform content (effects, trim, drawing)
+  // does NOT change clip structure, so a structure-only signature never fires
+  // studio:changed and Studio -> Scratch sync silently breaks.
+  function wavFingerprint () {
+    var wav = currentWav();
+    if (!wav) return '';
+    try {
+      var u8 = new Uint8Array(wav);
+      var n = u8.length;
+      var h = 2166136261 >>> 0;
+      var start = 44; // skip RIFF/WAVE header
+      var span = n - start;
+      var step = span > 0 ? Math.max(1, Math.floor(span / 512)) : 1;
+      for (var i = start; i < n; i += step) {
+        h ^= u8[i]; h = Math.imul(h, 16777619) >>> 0;
+      }
+      h ^= (n | 0); h = Math.imul(h, 16777619) >>> 0; // length detects trims
+      return h.toString(36);
+    } catch (e) { return ''; }
+  }
+
   function signature () {
     try {
+      var structure;
       if (TOOL === 'pulsegrid') {
         var pg = window.pulsegrid; if (!pg) return '';
         var p = pg.project || {};
-        return (p.name || '') + '|' + (p.tracks || []).map(function (t) {
+        structure = (p.name || '') + '|' + (p.tracks || []).map(function (t) {
           return (t.clips || []).map(function (c) { return c ? (c.sampleId + ':' + c.notes.length) : '_'; }).join(',');
         }).join(';') + '|' + ((pg.assets && pg.assets.size) || 0);
       } else {
         var app = window.__sonora; if (!app || !app.store) return '';
-        return (app.store.revision || 0) + '|' + Array.from(app.assets.keys()).join(',');
+        structure = (app.store.revision || 0) + '|' + Array.from(app.assets.keys()).join(',');
       }
+      // Combine structural + content signature so any waveform edit is detected.
+      return structure + '|W' + wavFingerprint();
     } catch (e) { return ''; }
   }
 
@@ -790,7 +815,7 @@ return {};
     if (!sig) return;
     if (!lastSig) { lastSig = sig; return; }
     if (sig !== lastSig) { lastSig = sig; notifyChange(); }
-  }, 1200);
+  }, 700);
 
   // ---- Message protocol with Studio shell (parent) ----
   window.addEventListener('message', function (e) {
@@ -2378,7 +2403,7 @@ return {SonoraApp};
           if (!decoded) return false;
           var pg = window.pulsegrid;
           if (!pg) return false;
-          suppressNotify = Date.now() + 4000;
+          suppressNotify = Date.now() + 1500;
           var asset = {
             id: 'sync-' + Date.now() + '-' + Math.floor(Math.random() * 1e6),
             name: name, sampleRate: decoded.sampleRate, frames: decoded.frames,
@@ -2424,7 +2449,7 @@ return {SonoraApp};
         var dt = new DataTransfer(); dt.items.add(file);
         var input2 = document.getElementById('file-input');
         if (!input2) return Promise.resolve(false);
-        suppressNotify = Date.now() + 5000;
+        suppressNotify = Date.now() + 2000;
         input2.files = dt.files;
         input2.dispatchEvent(new Event('change', {bubbles: true}));
         return new Promise(function (resolve) {
@@ -2453,18 +2478,43 @@ return {SonoraApp};
     });
   }
 
+  // Content fingerprint of the audio that currentWav() would export.
+  // Essential for two-way sync: editing waveform content (effects, trim, drawing)
+  // does NOT change clip structure, so a structure-only signature never fires
+  // studio:changed and Studio -> Scratch sync silently breaks.
+  function wavFingerprint () {
+    var wav = currentWav();
+    if (!wav) return '';
+    try {
+      var u8 = new Uint8Array(wav);
+      var n = u8.length;
+      var h = 2166136261 >>> 0;
+      var start = 44; // skip RIFF/WAVE header
+      var span = n - start;
+      var step = span > 0 ? Math.max(1, Math.floor(span / 512)) : 1;
+      for (var i = start; i < n; i += step) {
+        h ^= u8[i]; h = Math.imul(h, 16777619) >>> 0;
+      }
+      h ^= (n | 0); h = Math.imul(h, 16777619) >>> 0; // length detects trims
+      return h.toString(36);
+    } catch (e) { return ''; }
+  }
+
   function signature () {
     try {
+      var structure;
       if (TOOL === 'pulsegrid') {
         var pg = window.pulsegrid; if (!pg) return '';
         var p = pg.project || {};
-        return (p.name || '') + '|' + (p.tracks || []).map(function (t) {
+        structure = (p.name || '') + '|' + (p.tracks || []).map(function (t) {
           return (t.clips || []).map(function (c) { return c ? (c.sampleId + ':' + c.notes.length) : '_'; }).join(',');
         }).join(';') + '|' + ((pg.assets && pg.assets.size) || 0);
       } else {
         var app = window.__sonora; if (!app || !app.store) return '';
-        return (app.store.revision || 0) + '|' + Array.from(app.assets.keys()).join(',');
+        structure = (app.store.revision || 0) + '|' + Array.from(app.assets.keys()).join(',');
       }
+      // Combine structural + content signature so any waveform edit is detected.
+      return structure + '|W' + wavFingerprint();
     } catch (e) { return ''; }
   }
 
@@ -2479,7 +2529,7 @@ return {SonoraApp};
     if (!sig) return;
     if (!lastSig) { lastSig = sig; return; }
     if (sig !== lastSig) { lastSig = sig; notifyChange(); }
-  }, 1200);
+  }, 700);
 
   // ---- Message protocol with Studio shell (parent) ----
   window.addEventListener('message', function (e) {
