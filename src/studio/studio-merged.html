@@ -8,38 +8,45 @@
 :root{color-scheme:dark;--s-bg:#181a1d;--s-panel:#23262a;--s-line:#3a3e44;--s-text:#e0e2e6;--s-muted:#9aa0a8;--s-accent:#ec956e;--s-accent2:#8ad8b5}
 html[data-theme="light"]{color-scheme:light;--s-bg:#e8eaed;--s-panel:#ffffff;--s-line:#c9cdd2;--s-text:#20242a;--s-muted:#575e66;--s-accent:#c26a36;--s-accent2:#1a8f6a}
 *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:var(--s-bg);color:var(--s-text);font:12px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-#bar{height:38px;display:flex;align-items:center;gap:6px;padding:0 10px;background:var(--s-panel);border-bottom:1px solid var(--s-line);user-select:none}
-#bar .brand{font-weight:600;font-size:12px;margin-right:8px;letter-spacing:.3px}
+#bar{height:40px;display:flex;align-items:center;gap:8px;padding:0 10px;background:var(--s-panel);border-bottom:1px solid var(--s-line);user-select:none}
+#bar .brand{font-weight:600;font-size:12px;margin-right:4px;letter-spacing:.3px}
 #bar .brand i{font-style:normal;color:var(--s-accent)}
 #bar .sp{flex:1}
-#bar button{border:1px solid var(--s-line);background:transparent;color:var(--s-muted);border-radius:5px;padding:5px 11px;cursor:pointer;font-size:11px}
+#bar label{font-size:11px;color:var(--s-muted)}
+#toolSel{border:1px solid var(--s-line);background:var(--s-bg);color:var(--s-text);border-radius:5px;padding:5px 8px;font-size:11px;cursor:pointer;min-width:150px;outline:none}
+#toolSel:focus{border-color:var(--s-accent)}
+#bar .sync{font-size:10px;color:var(--s-muted);display:flex;align-items:center;gap:5px;min-width:96px}
+#bar .sync i{width:7px;height:7px;border-radius:50%;background:var(--s-accent2);display:inline-block;box-shadow:0 0 5px var(--s-accent2)}
+#bar .sync.busy i{background:var(--s-accent);box-shadow:0 0 5px var(--s-accent)}
+#bar button{border:1px solid var(--s-line);background:transparent;color:var(--s-muted);border-radius:5px;padding:5px 9px;cursor:pointer;font-size:11px}
 #bar button:hover{border-color:var(--s-accent)}
-#bar button.active{background:var(--s-accent);border-color:var(--s-accent);color:#1b1c1e;font-weight:600}
 #bar .theme{border-radius:50%;width:26px;height:26px;padding:0;display:flex;align-items:center;justify-content:center}
-#stage{height:calc(100% - 38px)}
+#stage{height:calc(100% - 40px)}
 .frame{width:100%;height:100%;border:0;background:var(--s-bg)}
-.split{display:flex}
-.split .frame{width:50%;height:100%}
-.split .sep{width:1px;background:var(--s-line)}
 .hide{display:none}
 .credit{position:fixed;bottom:2px;right:6px;font-size:9px;color:var(--s-muted);opacity:.55;pointer-events:none}
+.tip{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);text-align:center;color:var(--s-muted);font-size:12px;line-height:1.7;pointer-events:none}
 </style>
 </head>
 <body>
 <div id="bar">
   <span class="brand">Audio <i>Studio</i></span>
-  <button data-mode="split" class="active" title="Show both studios side by side">▦ Big View</button>
-  <button data-mode="pulsegrid" title="Edit in Pulsegrid Studio">Pulsegrid</button>
-  <button data-mode="sonora" title="Edit in Sonora Studio">Sonora</button>
+  <label for="toolSel">Editor</label>
+  <select id="toolSel" title="Choose which audio editor to use">
+    <option value="native">Scratch (native)</option>
+    <option value="pulsegrid" selected>Pulsegrid Studio</option>
+    <option value="sonora">Sonora Studio</option>
+  </select>
+  <span class="sync" id="sync"><i></i><span id="syncText">Synced</span></span>
   <span class="sp"></span>
   <button class="theme" id="themeBtn" title="Toggle dark / light theme">◐</button>
 </div>
-<div id="stage" class="split">
-  <iframe id="pg" class="frame" title="Pulsegrid Studio"></iframe>
-  <div class="sep"></div>
-  <iframe id="so" class="frame" title="Sonora Studio"></iframe>
+<div id="stage">
+  <iframe id="pg" class="frame hide" title="Pulsegrid Studio"></iframe>
+  <iframe id="so" class="frame hide" title="Sonora Studio"></iframe>
+  <div id="nativeTip" class="tip">Scratch native sound editor is active.<br>Choose Pulsegrid or Sonora above to edit the current sound there.</div>
 </div>
-<div class="credit">Pulsegrid Studio & Sonora Studio — independent open-source works, bundled intact.</div>
+<div class="credit">Pulsegrid Studio & Sonora Studio — independent open-source works, bundled intact. Audio sync stays on your device.</div>
 <script>
 (function(){
   var PG_HTML = `<!doctype html>
@@ -66,14 +73,11 @@ html[data-theme="light"]{color-scheme:light;--s-bg:#e8eaed;--s-panel:#ffffff;--s
 .track{min-height:0}
 .track-mixer{flex-basis:0}
 
-</style>
-<style id="rw-light-theme">
+</style><style id="rw-light-theme">
 html[data-theme="light"]{color-scheme:light!important;--bg:#eef0f2;--panel:#ffffff;--panel-light:#e7eaed;--line:#c9cdd2;--line-dark:#bcc1c7;--text:#20242a;--muted:#575e66;--dim:#878e96;--accent:#c26a36;--mint:#3f8f63;}
 html[data-theme="light"] input,html[data-theme="light"] select{background:#fff;color:#20242a;border-color:#c9cdd2}
 html[data-theme="light"] button:not(:disabled):hover{background:rgba(0,0,0,.06);color:#20242a}
-html[data-theme="light"] .status-led{filter:hue-rotate(0deg)}
-</style>
-</head>
+</style></head>
 <body>
 <svg aria-hidden="true" class="sprite" xmlns="http://www.w3.org/2000/svg"><defs>
 <symbol id="i-play" viewBox="0 0 24 24"><path d="m7 4 14 8-14 8Z" fill="currentColor" stroke="none"/></symbol>
@@ -132,7 +136,7 @@ html[data-theme="light"] .status-led{filter:hue-rotate(0deg)}
 <dialog id="help-dialog"><form method="dialog"><header><div><span class="eyebrow">PULSEGRID STUDIO</span><h2>A space for your next idea.</h2></div><button class="dialog-close" aria-label="Close help">×</button></header><div class="help-columns"><section><h3>Make some noise</h3><p>Press <kbd>Space</kbd> to play. Launch individual clips with their triangle, or a full scene from the right-hand column. Launches wait for the selected quantization boundary.</p><p>Select a clip to edit. Double-click to add a note, drag to move, drag its right edge to resize. Right-click or <kbd>Delete</kbd> removes selected notes. <kbd>B</kbd> toggles drawing.</p><p>The computer keyboard <kbd>A W S E D F T G Y H U J K</kbd> plays C4–C5. <kbd>Z</kbd>/<kbd>X</kbd> changes octave. Web MIDI is available through the bottom MIDI button.</p></section><section><h3>Shape and arrange</h3><p><kbd>Tab</kbd> switches Session and Arrangement. Double-click an empty arrangement lane to insert its selected clip. Drag or resize instances without changing the source. The Automation button edits a track-volume envelope.</p><p>Drop an audio file to create a sample clip. Start and end markers, reverse, gain, and tempo-synced repitch are non-destructive. No phase-vocoder time stretching is claimed.</p><p>On MIDI tracks, Record overdubs keyboard/MIDI notes. On audio tracks, it requests microphone access and captures raw PCM. Monitoring is off by default to prevent feedback.</p></section></div><p class="help-fine">Local-first · No account · No external audio assets · Save embeds samples · Export renders actual audio<br>Independent software inspired by clip-based DAW workflows. Not affiliated with Ableton. No VST/AU hosting, pitch-preserving warping, or hard-real-time browser guarantee.</p><button class="primary">Back to the set</button></form></dialog>
 <input id="audio-file" type="file" accept="audio/*,.wav,.aif,.aiff,.mp3,.ogg,.flac,.m4a" multiple hidden><input id="project-file" type="file" accept=".pulse,.json" hidden>
 <script type="module">
-(()=>{
+(async()=>{
 'use strict';
 const __modules=Object.create(null);
 __modules["engine/model.js"]=(()=>{
@@ -354,12 +358,12 @@ function download(data,name,type='application/octet-stream'){const blob=data ins
 
 return {autosave,restore,serialize,deserialize,download};
 })();
-__modules["app.js"]=(()=>{
+__modules["app.js"]=(async()=>{
 const {demoProject,factorySamples,makeTrack,makeClip,History,uid,clone,clamp,noteName,COLORS,validateProject} = __modules["engine/model.js"];
 const {AudioHost} = __modules["engine/audio.js"];
 const {Surface,WaveCache} = __modules["engine/visual.js"];
 const {autosave,restore,serialize,deserialize,download} = __modules["engine/storage.js"];
-const $=s=>document.querySelector(s),$=s=>[...document.querySelectorAll(s)],icon=name=>\`<svg><use href="#i-\${name}"/></svg>\`,esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],icon=name=>\`<svg><use href="#i-\${name}"/></svg>\`,esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const audio=new AudioHost(),waves=new WaveCache(),liveRoutes=new Map();
 const ui={track:0,scene:0,detail:'clip',base:36,grid:.25,velocity:100/127,draw:false,selectedNote:null,selectedInstance:null,bars:16,automation:false,record:null,recordHeld:new Map(),held:new Map(),octave:0,category:'Sounds',dirty:true,exportWorker:null,gesture:null};
 let toastTimer,saveTimer,saveChain=Promise.resolve(),dragDepth=0,metronome=false,taps=[];
@@ -379,7 +383,7 @@ function renderTracks(){const p=project();$('#track-grid').innerHTML=p.tracks.ma
 function db(value){return value>.00001?\`\${(20*Math.log10(value)).toFixed(1)} dB\`:'−∞ dB';}
 function renderOverview(){const p=project(),total=Math.max(p.loopEnd,64);$('.overview-lanes').innerHTML=p.tracks.slice(0,6).map(t=>\`<div class="overview-lane">\${t.arrangement.map(a=>\`<span style="background:\${t.color};position:absolute;width:\${a.length/total*100}%;left:\${a.start/total*100}%"></span>\`).join('')}</div>\`).join('');}
 function select(t,s=ui.scene){ui.track=clamp(t,0,project().tracks.length-1);ui.scene=clamp(s,0,project().scenes.length-1);ui.selectedNote=null;const c=clip();if(c?.notes.length){const min=Math.min(...c.notes.map(n=>n.pitch));ui.base=clamp(Math.floor(min/12)*12,0,104);}else ui.base=track().instrument==='drums'?36:48;renderSelection();renderDetail();ui.dirty=true;}
-function renderSelection(){$('.track-header').forEach(e=>e.classList.toggle('selected',+e.dataset.selectTrack===ui.track));$('.clip').forEach(e=>e.classList.toggle('selected',+e.dataset.track===ui.track&&+e.dataset.scene===ui.scene));$('.scene-launch').forEach(e=>e.classList.toggle('selected',+e.dataset.sceneLaunch===ui.scene));renderArrangementLabels();}
+function renderSelection(){$$('.track-header').forEach(e=>e.classList.toggle('selected',+e.dataset.selectTrack===ui.track));$$('.clip').forEach(e=>e.classList.toggle('selected',+e.dataset.track===ui.track&&+e.dataset.scene===ui.scene));$$('.scene-launch').forEach(e=>e.classList.toggle('selected',+e.dataset.sceneLaunch===ui.scene));renderArrangementLabels();}
 function renderDetail(){const t=track(),c=clip();if(!t)return;$('#detail-track').textContent=\`\${ui.track+1} — \${t.name}\`;$('#clip-tab').classList.toggle('selected',ui.detail==='clip');$('#devices-tab').classList.toggle('selected',ui.detail==='devices');$('#clip-detail').classList.toggle('hidden',ui.detail!=='clip');$('#devices-detail').classList.toggle('hidden',ui.detail!=='devices');$('#duplicate-clip').disabled=!c;$('#delete-clip').disabled=!c;$('#clip-color').style.background=t.color;$('#clip-name').value=c?.name||'Empty slot';$('#clip-name').disabled=!c;$('#clip-type').textContent=c?(c.kind==='audio'?'AUDIO CLIP · PCM':'MIDI CLIP'):'NO CLIP SELECTED';$('#editor-empty').classList.toggle('hidden',!!c);const isAudio=c?.kind==='audio';$('#midi-properties').classList.toggle('hidden',isAudio);$('#sample-properties').classList.toggle('hidden',!isAudio);$('#pencil').classList.toggle('hidden',isAudio);$('#piano-keys').classList.toggle('hidden',isAudio);$('#pencil').classList.toggle('active',ui.draw);$('#clip-length').disabled=!c;
   if(c){if(![...$('#clip-length').options].some(o=>+o.value===c.length))$('#clip-length').add(new Option(\`\${(c.length/4).toFixed(2)} bars\`,c.length));$('#clip-length').value=c.length;}
   if(isAudio){$('#trim-start').value=(c.trimStart*100).toFixed(1);$('#trim-end').value=(c.trimEnd*100).toFixed(1);$('#sample-reverse').classList.toggle('active',c.reverse);$('#sample-warp').classList.toggle('active',c.warp);const asset=audio.assets.get(c.sampleId);$('#editor-hint').textContent='Drag the start/end markers · Edits preserve the original sample · Double-click to launch';$('#editor-info').textContent=asset?\`\${(asset.frames/asset.sampleRate).toFixed(2)} s · \${(asset.sampleRate/1000).toFixed(1)} kHz · \${asset.channels.length} ch\`:'Drop audio or choose a sample from the library';}
@@ -403,13 +407,13 @@ function setView(view){commit(\`Switched to \${view}\`,p=>p.mode=view);}
 function currentBeat(){const m=audio.meter;if(!m)return project().loopStart;const advance=m.playing&&audio.context?Math.max(0,audio.context.currentTime-m.frame/audio.context.sampleRate)*project().bpm/60:0;let b=m.beat+advance;if(project().mode==='arrangement'&&project().loop&&b>=project().loopEnd)b=project().loopStart+(b-project().loopEnd);return b;}
 function clipPosition(){const m=audio.meter,c=clip();if(!c||!m?.playing||m.active[ui.track]!==ui.scene)return -1;const advance=audio.context?Math.max(0,audio.context.currentTime-m.frame/audio.context.sampleRate)*project().bpm/60:0;return ((m.positions?.[ui.track]??currentBeat())+advance)%c.length;}
 function updateMeters(m){const percent=x=>clamp((20*Math.log10(Math.max(.000001,x))+60)/60*100,0,100);for(let i=0;i<project().tracks.length;i++){const l=$(\`#meter-\${i}-l\`),r=$(\`#meter-\${i}-r\`);if(l)l.style.height=percent(m.peaks[i*2])+'%';if(r)r.style.height=percent(m.peaks[i*2+1])+'%';}if($('#master-meter-l')){$('#master-meter-l').style.height=percent(m.masterL)+'%';$('#master-meter-r').style.height=percent(m.masterR)+'%';}
-  $('#play').classList.toggle('playing',m.playing);$('#play').setAttribute('aria-label',m.playing?'Pause':'Play');$('.clip').forEach(el=>{const t=+el.dataset.track,s=+el.dataset.scene,playing=m.playing&&m.active[t]===s,queued=m.pending[t]===s;el.classList.toggle('playing',playing);el.classList.toggle('queued',queued);const pos=el.querySelector('.clip-progress');pos.classList.toggle('hidden',!playing);if(playing){const c=project().tracks[t].clips[s];pos.style.left=(m.positions?.[t]??(m.beat%c.length))/c.length*100+'%';}});
+  $('#play').classList.toggle('playing',m.playing);$('#play').setAttribute('aria-label',m.playing?'Pause':'Play');$$('.clip').forEach(el=>{const t=+el.dataset.track,s=+el.dataset.scene,playing=m.playing&&m.active[t]===s,queued=m.pending[t]===s;el.classList.toggle('playing',playing);el.classList.toggle('queued',queued);const pos=el.querySelector('.clip-progress');pos.classList.toggle('hidden',!playing);if(playing){const c=project().tracks[t].clips[s];pos.style.left=(m.positions?.[t]??(m.beat%c.length))/c.length*100+'%';}});
 }
 const presets=[{name:'Glass keys',tag:'POLY',instrument:'poly',oscillator:'saw',cutoff:3300,attack:.022,release:.38,delayMix:.12},{name:'Sub circuit',tag:'BASS',instrument:'bass',oscillator:'square',cutoff:1400,attack:.004,release:.16,delayMix:0},{name:'Prism pluck',tag:'PLUCK',instrument:'pluck',oscillator:'triangle',cutoff:6000,attack:.003,release:.13,sustain:.12,delayMix:.22},{name:'Soft signal',tag:'SINE',instrument:'poly',oscillator:'sine',cutoff:10000,attack:.025,release:.5,delayMix:.15},{name:'Analog drift',tag:'POLY',instrument:'poly',oscillator:'saw',cutoff:2400,attack:.12,release:.8,delayMix:.1},{name:'Drum machine',tag:'DRUM',instrument:'drums',cutoff:14000,delayMix:0}];
 function renderLibrary(){let items=[];const cat=ui.category,query=$('#browser-search').value.toLowerCase();if(cat==='Sounds'||cat==='Favorites'||cat==='Instruments'||cat==='Drums')items=presets.filter(p=>cat!=='Drums'||p.instrument==='drums').map(p=>({name:p.name,tag:p.tag,type:'preset',index:presets.indexOf(p),icon:p.instrument==='drums'?'drum':'key'}));
   else if(cat==='Audio Effects')items=[{name:'Color filter',tag:'SVF',type:'effect',index:'filter',icon:'knob'},{name:'Stereo echo',tag:'SYNC',type:'effect',index:'delay',icon:'knob'},{name:'Soft saturation',tag:'DRIVE',type:'effect',index:'drive',icon:'knob'},{name:'Lookahead dynamics',tag:'PDC',type:'effect',index:'compressor',icon:'knob'}];
   else items=[...audio.assets.values()].map(a=>({name:a.name,tag:'PCM',type:'sample',index:a.id,icon:'wave'}));
-  items=items.filter(a=>a.name.toLowerCase().includes(query));$('#library-heading').textContent=cat.toUpperCase();$('#library-count').textContent=items.length;$('#library').innerHTML=items.length?items.map(i=>\`<button class="library-item" data-library-type="\${i.type}" data-library-id="\${esc(i.index)}" title="Double-click to load \${esc(i.name)}">\${icon(i.icon)}<span>\${esc(i.name)}</span><span class="preset-tag">\${i.tag}</span></button>\`).join(''):'<div class="device-extra" style="padding:8px">No matching sounds.</div>';$('[data-category]').forEach(b=>b.classList.toggle('selected',b.dataset.category===cat));}
+  items=items.filter(a=>a.name.toLowerCase().includes(query));$('#library-heading').textContent=cat.toUpperCase();$('#library-count').textContent=items.length;$('#library').innerHTML=items.length?items.map(i=>\`<button class="library-item" data-library-type="\${i.type}" data-library-id="\${esc(i.index)}" title="Double-click to load \${esc(i.name)}">\${icon(i.icon)}<span>\${esc(i.name)}</span><span class="preset-tag">\${i.tag}</span></button>\`).join(''):'<div class="device-extra" style="padding:8px">No matching sounds.</div>';$$('[data-category]').forEach(b=>b.classList.toggle('selected',b.dataset.category===cat));}
 function ensureClip(){if(!clip())commit('Create clip',p=>{p.tracks[ui.track].clips[ui.scene]=makeClip('New idea',8,track().type==='audio'?'audio':'midi');});return clip();}
 function addTrack(type='midi'){if(project().tracks.length>=16){message('This engine is configured for up to 16 tracks.',true);return;}commit(\`Add \${type} track\`,p=>{const t=makeTrack(type==='audio'?'Audio '+(p.tracks.length+1):'MIDI '+(p.tracks.length+1),type==='audio'?'audio':'poly',COLORS[p.tracks.length%COLORS.length]);t.clips=Array(p.scenes.length).fill(null);p.tracks.push(t);ui.track=p.tracks.length-1;});select(ui.track);}
 function addScene(){if(project().scenes.length>=32){message('This workspace supports up to 32 scenes.',true);return;}commit('Add scene',p=>{p.scenes.push(\`Scene \${p.scenes.length+1}\`);p.tracks.forEach(t=>t.clips.push(null));});}
@@ -587,20 +591,240 @@ audio.setProject(project());renderAll();requestAnimationFrame(frame);
 window.pulsegrid=Object.freeze({audio,history,ui,surfaces:{editor,arranger},get project(){return project();},get assets(){return audio.assets;},save:saveFile,serialize:()=>serialize(project(),audio.assets)});
 
 return {};
-})();
-})();
+})().catch(e=>{console.error(e);});
+})().catch(e=>{console.error('Pulsegrid boot failed:',e);});
 <\/script>
-
 <script>
-(function(){
-  var t=new URLSearchParams(location.search).get('theme');
-  if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;
-  window.addEventListener('message',function(e){
-    var d=e.data; if(!d||typeof d!=='object')return;
-    if(d.type==='studio:theme'&&(d.theme==='light'||d.theme==='dark'))document.documentElement.dataset.theme=d.theme;
+/*
+ * RemixWarp Audio-Sync bridge — injected into each bundled editor.
+ * Provides:
+ *   1) programmatic import of an already-rendered WAV (studio:load-wav)
+ *   2) programmatic export of the editor's current audio as WAV (studio:export-wav)
+ *   3) change notification (studio:changed) so the host can pull the latest WAV
+ * All audio stays local; no network. Uses each editor's own native import path.
+ */
+(function () {
+  'use strict';
+  var TOOL = 'pulsegrid';               // 'pulsegrid' | 'sonora'
+  var lastSig = '';
+  var suppressNotify = 0;
+
+  function post (msg) {
+    try { parent.postMessage(msg, '*'); } catch (e) {}
+  }
+
+  // ---- WAV encoder: Float32 channels -> 16-bit PCM WAV ArrayBuffer ----
+  function encodeWav (channels, sampleRate) {
+    if (!channels || !channels.length || !channels[0]) return null;
+    var numCh = channels.length, len = channels[0].length;
+    if (!len) return null;
+    var bytesPerSample = 2, blockAlign = numCh * bytesPerSample;
+    var ab = new ArrayBuffer(44 + len * blockAlign), view = new DataView(ab);
+    function str (o, s) { for (var i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); }
+    str(0, 'RIFF'); view.setUint32(4, 36 + len * blockAlign, true); str(8, 'WAVE');
+    str(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+    view.setUint16(22, numCh, true); view.setUint32(24, sampleRate || 44100, true);
+    view.setUint32(28, (sampleRate || 44100) * blockAlign, true);
+    view.setUint16(32, blockAlign, true); view.setUint16(34, 16, true);
+    str(36, 'data'); view.setUint32(40, len * blockAlign, true);
+    var off = 44;
+    for (var i = 0; i < len; i++) {
+      for (var c = 0; c < numCh; c++) {
+        var v = channels[c][i] || 0;
+        if (v > 1) v = 1; else if (v < -1) v = -1;
+        view.setInt16(off, v < 0 ? v * 0x8000 : v * 0x7FFF, true);
+        off += 2;
+      }
+    }
+    return ab;
+  }
+
+  // ---- Resolve the "current" audio in each editor and encode to WAV ----
+  function currentWav () {
+    try {
+      if (TOOL === 'pulsegrid') {
+        var pg = window.pulsegrid;
+        if (!pg || !pg.assets) return null;
+        var p = pg.project, ui = pg.ui || {};
+        var t = p && p.tracks && p.tracks[ui.track || 0];
+        var c = t && t.clips && t.clips[ui.scene || 0];
+        var asset = (c && c.sampleId && pg.assets.get(c.sampleId)) || null;
+        if (!asset || !asset.channels) {
+          var list = Array.from(pg.assets.values());
+          for (var i = 0; i < list.length; i++) {
+            if (list[i].channels && list[i].frames > 1 && list[i].id !== 'factory-atmosphere') { asset = list[i]; break; }
+          }
+          if (!asset && list.length) asset = list[0];
+        }
+        if (!asset || !asset.channels) return null;
+        return encodeWav(asset.channels, asset.sampleRate);
+      } else {
+        var app = window.__sonora;
+        if (!app || !app.assets) return null;
+        var id = app.ui && app.ui.selectedAssetId;
+        var a = (id && app.assets.get(id)) || null;
+        if (!a || !a.buffer) {
+          var all = Array.from(app.assets.values());
+          for (var j = 0; j < all.length; j++) { if (all[j].buffer && all[j].buffer.length > 1) { a = all[j]; break; } }
+        }
+        if (!a || !a.buffer) return null;
+        var chans = [];
+        for (var k = 0; k < a.buffer.numberOfChannels; k++) chans.push(a.buffer.getChannelData(k));
+        return encodeWav(chans, a.buffer.sampleRate);
+      }
+    } catch (e) { return null; }
+  }
+
+  // ---- Programmatic import of a WAV that is already loaded in the editor ----
+  function loadWav (ab, name) {
+    if (!(ab instanceof ArrayBuffer) && !ArrayBuffer.isView(ab)) return Promise.resolve(false);
+    if (ArrayBuffer.isView(ab)) ab = ab.buffer.slice(ab.byteOffset, ab.byteOffset + ab.byteLength);
+    name = name || 'synced.wav';
+    try {
+      if (TOOL === 'pulsegrid') {
+        // Pulsegrid's own decoder needs an AudioWorklet which cannot load from a
+        // srcdoc (blob) iframe. Decode with a plain AudioContext and inject through
+        // the public pulsegrid API instead - same data model, no worklet needed.
+        return decodeChannels(ab).then(function (decoded) {
+          if (!decoded) return false;
+          var pg = window.pulsegrid;
+          if (!pg) return false;
+          suppressNotify = Date.now() + 4000;
+          var asset = {
+            id: 'sync-' + Date.now() + '-' + Math.floor(Math.random() * 1e6),
+            name: name, sampleRate: decoded.sampleRate, frames: decoded.frames,
+            channels: decoded.channels
+          };
+          pg.audio.addSample(asset);
+          pg.history.commit('Sync audio', function (pr) {
+            var t = pr.tracks[pg.ui.track || 0];
+            if (!t || t.type !== 'audio') {
+              t = pr.tracks.find(function (x) { return x.type === 'audio'; });
+              if (!t) {
+                pr.tracks.push({
+                  id: 'sync-track-' + Date.now(), name: 'Sync audio', type: 'audio',
+                  color: '#86b9db', instrument: 'sampler', volume: 0.72, pan: 0,
+                  mute: false, solo: false, arm: false, clips: Array(pr.scenes.length).fill(null),
+                  arrangement: [], automation: [], sampleId: null, rootNote: 60
+                });
+                t = pr.tracks[pr.tracks.length - 1];
+              }
+            }
+            var idx = pg.ui.scene || 0;
+            while (t.clips.length <= idx) t.clips.push(null);
+            if (t.clips[idx]) {
+              var free = t.clips.findIndex(function (c) { return !c; });
+              if (free >= 0) idx = free; else { pr.scenes.push('Scene ' + (pr.scenes.length + 1)); t.clips.push(null); idx = t.clips.length - 1; }
+            }
+            var clip = {
+              id: 'clip-' + Date.now() + '-' + Math.floor(Math.random() * 1e6),
+              name: name.replace(/\\.[^.]+$/, ''), kind: 'audio',
+              length: Math.max(0.25, Math.round(decoded.frames / decoded.sampleRate * pr.bpm / 60 * 4) / 4),
+              notes: [], sampleId: asset.id, trimStart: 0, trimEnd: 1,
+              reverse: false, warp: false, gain: 1, fadeIn: 0.004, fadeOut: 0.015
+            };
+            t.clips[idx] = clip;
+            pg.ui.scene = idx;
+          });
+          lastSig = signature();
+          return true;
+        }).catch(function () { return false; });
+      } else {
+        // Sonora's native importer uses a classic-worker blob and works in srcdoc.
+        var file = new File([ab], name, {type: 'audio/wav'});
+        var dt = new DataTransfer(); dt.items.add(file);
+        var input2 = document.getElementById('file-input');
+        if (!input2) return Promise.resolve(false);
+        suppressNotify = Date.now() + 5000;
+        input2.files = dt.files;
+        input2.dispatchEvent(new Event('change', {bubbles: true}));
+        return new Promise(function (resolve) {
+          setTimeout(function () { lastSig = signature(); resolve(true); }, 600);
+        });
+      }
+    } catch (e) { return Promise.resolve(false); }
+  }
+
+  // Decode a WAV ArrayBuffer into Float32 channels with a plain AudioContext.
+  function decodeChannels (ab) {
+    return new Promise(function (resolve) {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return resolve(null);
+      var ctx;
+      try { ctx = new Ctx(); } catch (e) { return resolve(null); }
+      var copy;
+      try { copy = ab.slice(0); } catch (e) { copy = ab; }
+      var p = ctx.decodeAudioData(copy);
+      Promise.resolve(p).then(function (buf) {
+        var chans = [];
+        for (var i = 0; i < Math.min(2, buf.numberOfChannels); i++) chans.push(buf.getChannelData(i).slice());
+        try { ctx.close(); } catch (e) {}
+        resolve({channels: chans, sampleRate: buf.sampleRate, frames: buf.length});
+      }).catch(function () { try { ctx.close(); } catch (e) {} resolve(null); });
+    });
+  }
+
+  function signature () {
+    try {
+      if (TOOL === 'pulsegrid') {
+        var pg = window.pulsegrid; if (!pg) return '';
+        var p = pg.project || {};
+        return (p.name || '') + '|' + (p.tracks || []).map(function (t) {
+          return (t.clips || []).map(function (c) { return c ? (c.sampleId + ':' + c.notes.length) : '_'; }).join(',');
+        }).join(';') + '|' + ((pg.assets && pg.assets.size) || 0);
+      } else {
+        var app = window.__sonora; if (!app || !app.store) return '';
+        return (app.store.revision || 0) + '|' + Array.from(app.assets.keys()).join(',');
+      }
+    } catch (e) { return ''; }
+  }
+
+  function notifyChange () {
+    if (Date.now() < suppressNotify) return;
+    post({type: 'studio:changed', tool: TOOL});
+  }
+
+  // Poll for edits (both editors mutate JS state, no reliable DOM event).
+  setInterval(function () {
+    var sig = signature();
+    if (!sig) return;
+    if (!lastSig) { lastSig = sig; return; }
+    if (sig !== lastSig) { lastSig = sig; notifyChange(); }
+  }, 1200);
+
+  // ---- Message protocol with Studio shell (parent) ----
+  window.addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || typeof d !== 'object') return;
+    if (d.type === 'studio:theme') {
+      if (d.theme === 'light' || d.theme === 'dark') document.documentElement.dataset.theme = d.theme;
+      return;
+    }
+    if (d.type === 'studio:load-wav') {
+      loadWav(d.wav, d.name).then(function (ok) {
+        post({type: 'studio:loaded', tool: TOOL, token: d.token, ok: !!ok});
+      });
+      return;
+    }
+    if (d.type === 'studio:export-wav') {
+      var wav = currentWav();
+      post({type: 'studio:wav-export', tool: TOOL, token: d.token, wav: wav});
+      return;
+    }
   });
-  try{parent.postMessage({type:'studio:child-ready',tool:'pulsegrid'},'*');}catch(e){}
+
+  // Signal readiness only after the editor's global API exists.
+  var readySent = false;
+  var timer = setInterval(function () {
+    var ok = TOOL === 'pulsegrid' ? !!window.pulsegrid : !!window.__sonora;
+    if (ok && !readySent) {
+      readySent = true;
+      clearInterval(timer);
+      setTimeout(function () { lastSig = signature(); post({type: 'studio:child-ready', tool: TOOL}); }, 300);
+    }
+  }, 150);
 })();
+
 <\/script>
 </body></html>
 `;
@@ -617,12 +841,10 @@ return {};
 .rotate-up{transform:rotate(-90deg)}
 
 </style>
-
 <style id="rw-light-theme">
 html[data-theme="light"]{color-scheme:light!important;--bg:#eef0f2;--panel:#ffffff;--panel-deep:#e7eaed;--panel-raised:#f7f8fa;--line:#c9cdd2;--line-soft:#dfe2e6;--text:#20242a;--muted:#575e66;--dim:#878e96;--accent:#1a8f6a;--accent-strong:#0f6b4f;--accent-bg:#dcefe6;--input:#ffffff;}
 html[data-theme="light"] button:not(:disabled):hover{background:rgba(0,0,0,.06)}
-</style>
-</head>
+</style></head>
 <body>
 <div class="application" id="app">
   <header class="appbar">
@@ -2061,35 +2283,289 @@ return {SonoraApp};
 })();
 })();
 <\/script>
-
 <script>
-(function(){
-  var t=new URLSearchParams(location.search).get('theme');
-  if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;
-  window.addEventListener('message',function(e){
-    var d=e.data; if(!d||typeof d!=='object')return;
-    if(d.type==='studio:theme'&&(d.theme==='light'||d.theme==='dark'))document.documentElement.dataset.theme=d.theme;
+/*
+ * RemixWarp Audio-Sync bridge — injected into each bundled editor.
+ * Provides:
+ *   1) programmatic import of an already-rendered WAV (studio:load-wav)
+ *   2) programmatic export of the editor's current audio as WAV (studio:export-wav)
+ *   3) change notification (studio:changed) so the host can pull the latest WAV
+ * All audio stays local; no network. Uses each editor's own native import path.
+ */
+(function () {
+  'use strict';
+  var TOOL = 'sonora';               // 'pulsegrid' | 'sonora'
+  var lastSig = '';
+  var suppressNotify = 0;
+
+  function post (msg) {
+    try { parent.postMessage(msg, '*'); } catch (e) {}
+  }
+
+  // ---- WAV encoder: Float32 channels -> 16-bit PCM WAV ArrayBuffer ----
+  function encodeWav (channels, sampleRate) {
+    if (!channels || !channels.length || !channels[0]) return null;
+    var numCh = channels.length, len = channels[0].length;
+    if (!len) return null;
+    var bytesPerSample = 2, blockAlign = numCh * bytesPerSample;
+    var ab = new ArrayBuffer(44 + len * blockAlign), view = new DataView(ab);
+    function str (o, s) { for (var i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); }
+    str(0, 'RIFF'); view.setUint32(4, 36 + len * blockAlign, true); str(8, 'WAVE');
+    str(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+    view.setUint16(22, numCh, true); view.setUint32(24, sampleRate || 44100, true);
+    view.setUint32(28, (sampleRate || 44100) * blockAlign, true);
+    view.setUint16(32, blockAlign, true); view.setUint16(34, 16, true);
+    str(36, 'data'); view.setUint32(40, len * blockAlign, true);
+    var off = 44;
+    for (var i = 0; i < len; i++) {
+      for (var c = 0; c < numCh; c++) {
+        var v = channels[c][i] || 0;
+        if (v > 1) v = 1; else if (v < -1) v = -1;
+        view.setInt16(off, v < 0 ? v * 0x8000 : v * 0x7FFF, true);
+        off += 2;
+      }
+    }
+    return ab;
+  }
+
+  // ---- Resolve the "current" audio in each editor and encode to WAV ----
+  function currentWav () {
+    try {
+      if (TOOL === 'pulsegrid') {
+        var pg = window.pulsegrid;
+        if (!pg || !pg.assets) return null;
+        var p = pg.project, ui = pg.ui || {};
+        var t = p && p.tracks && p.tracks[ui.track || 0];
+        var c = t && t.clips && t.clips[ui.scene || 0];
+        var asset = (c && c.sampleId && pg.assets.get(c.sampleId)) || null;
+        if (!asset || !asset.channels) {
+          var list = Array.from(pg.assets.values());
+          for (var i = 0; i < list.length; i++) {
+            if (list[i].channels && list[i].frames > 1 && list[i].id !== 'factory-atmosphere') { asset = list[i]; break; }
+          }
+          if (!asset && list.length) asset = list[0];
+        }
+        if (!asset || !asset.channels) return null;
+        return encodeWav(asset.channels, asset.sampleRate);
+      } else {
+        var app = window.__sonora;
+        if (!app || !app.assets) return null;
+        var id = app.ui && app.ui.selectedAssetId;
+        var a = (id && app.assets.get(id)) || null;
+        if (!a || !a.buffer) {
+          var all = Array.from(app.assets.values());
+          for (var j = 0; j < all.length; j++) { if (all[j].buffer && all[j].buffer.length > 1) { a = all[j]; break; } }
+        }
+        if (!a || !a.buffer) return null;
+        var chans = [];
+        for (var k = 0; k < a.buffer.numberOfChannels; k++) chans.push(a.buffer.getChannelData(k));
+        return encodeWav(chans, a.buffer.sampleRate);
+      }
+    } catch (e) { return null; }
+  }
+
+  // ---- Programmatic import of a WAV that is already loaded in the editor ----
+  function loadWav (ab, name) {
+    if (!(ab instanceof ArrayBuffer) && !ArrayBuffer.isView(ab)) return Promise.resolve(false);
+    if (ArrayBuffer.isView(ab)) ab = ab.buffer.slice(ab.byteOffset, ab.byteOffset + ab.byteLength);
+    name = name || 'synced.wav';
+    try {
+      if (TOOL === 'pulsegrid') {
+        // Pulsegrid's own decoder needs an AudioWorklet which cannot load from a
+        // srcdoc (blob) iframe. Decode with a plain AudioContext and inject through
+        // the public pulsegrid API instead - same data model, no worklet needed.
+        return decodeChannels(ab).then(function (decoded) {
+          if (!decoded) return false;
+          var pg = window.pulsegrid;
+          if (!pg) return false;
+          suppressNotify = Date.now() + 4000;
+          var asset = {
+            id: 'sync-' + Date.now() + '-' + Math.floor(Math.random() * 1e6),
+            name: name, sampleRate: decoded.sampleRate, frames: decoded.frames,
+            channels: decoded.channels
+          };
+          pg.audio.addSample(asset);
+          pg.history.commit('Sync audio', function (pr) {
+            var t = pr.tracks[pg.ui.track || 0];
+            if (!t || t.type !== 'audio') {
+              t = pr.tracks.find(function (x) { return x.type === 'audio'; });
+              if (!t) {
+                pr.tracks.push({
+                  id: 'sync-track-' + Date.now(), name: 'Sync audio', type: 'audio',
+                  color: '#86b9db', instrument: 'sampler', volume: 0.72, pan: 0,
+                  mute: false, solo: false, arm: false, clips: Array(pr.scenes.length).fill(null),
+                  arrangement: [], automation: [], sampleId: null, rootNote: 60
+                });
+                t = pr.tracks[pr.tracks.length - 1];
+              }
+            }
+            var idx = pg.ui.scene || 0;
+            while (t.clips.length <= idx) t.clips.push(null);
+            if (t.clips[idx]) {
+              var free = t.clips.findIndex(function (c) { return !c; });
+              if (free >= 0) idx = free; else { pr.scenes.push('Scene ' + (pr.scenes.length + 1)); t.clips.push(null); idx = t.clips.length - 1; }
+            }
+            var clip = {
+              id: 'clip-' + Date.now() + '-' + Math.floor(Math.random() * 1e6),
+              name: name.replace(/\\.[^.]+$/, ''), kind: 'audio',
+              length: Math.max(0.25, Math.round(decoded.frames / decoded.sampleRate * pr.bpm / 60 * 4) / 4),
+              notes: [], sampleId: asset.id, trimStart: 0, trimEnd: 1,
+              reverse: false, warp: false, gain: 1, fadeIn: 0.004, fadeOut: 0.015
+            };
+            t.clips[idx] = clip;
+            pg.ui.scene = idx;
+          });
+          lastSig = signature();
+          return true;
+        }).catch(function () { return false; });
+      } else {
+        // Sonora's native importer uses a classic-worker blob and works in srcdoc.
+        var file = new File([ab], name, {type: 'audio/wav'});
+        var dt = new DataTransfer(); dt.items.add(file);
+        var input2 = document.getElementById('file-input');
+        if (!input2) return Promise.resolve(false);
+        suppressNotify = Date.now() + 5000;
+        input2.files = dt.files;
+        input2.dispatchEvent(new Event('change', {bubbles: true}));
+        return new Promise(function (resolve) {
+          setTimeout(function () { lastSig = signature(); resolve(true); }, 600);
+        });
+      }
+    } catch (e) { return Promise.resolve(false); }
+  }
+
+  // Decode a WAV ArrayBuffer into Float32 channels with a plain AudioContext.
+  function decodeChannels (ab) {
+    return new Promise(function (resolve) {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return resolve(null);
+      var ctx;
+      try { ctx = new Ctx(); } catch (e) { return resolve(null); }
+      var copy;
+      try { copy = ab.slice(0); } catch (e) { copy = ab; }
+      var p = ctx.decodeAudioData(copy);
+      Promise.resolve(p).then(function (buf) {
+        var chans = [];
+        for (var i = 0; i < Math.min(2, buf.numberOfChannels); i++) chans.push(buf.getChannelData(i).slice());
+        try { ctx.close(); } catch (e) {}
+        resolve({channels: chans, sampleRate: buf.sampleRate, frames: buf.length});
+      }).catch(function () { try { ctx.close(); } catch (e) {} resolve(null); });
+    });
+  }
+
+  function signature () {
+    try {
+      if (TOOL === 'pulsegrid') {
+        var pg = window.pulsegrid; if (!pg) return '';
+        var p = pg.project || {};
+        return (p.name || '') + '|' + (p.tracks || []).map(function (t) {
+          return (t.clips || []).map(function (c) { return c ? (c.sampleId + ':' + c.notes.length) : '_'; }).join(',');
+        }).join(';') + '|' + ((pg.assets && pg.assets.size) || 0);
+      } else {
+        var app = window.__sonora; if (!app || !app.store) return '';
+        return (app.store.revision || 0) + '|' + Array.from(app.assets.keys()).join(',');
+      }
+    } catch (e) { return ''; }
+  }
+
+  function notifyChange () {
+    if (Date.now() < suppressNotify) return;
+    post({type: 'studio:changed', tool: TOOL});
+  }
+
+  // Poll for edits (both editors mutate JS state, no reliable DOM event).
+  setInterval(function () {
+    var sig = signature();
+    if (!sig) return;
+    if (!lastSig) { lastSig = sig; return; }
+    if (sig !== lastSig) { lastSig = sig; notifyChange(); }
+  }, 1200);
+
+  // ---- Message protocol with Studio shell (parent) ----
+  window.addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || typeof d !== 'object') return;
+    if (d.type === 'studio:theme') {
+      if (d.theme === 'light' || d.theme === 'dark') document.documentElement.dataset.theme = d.theme;
+      return;
+    }
+    if (d.type === 'studio:load-wav') {
+      loadWav(d.wav, d.name).then(function (ok) {
+        post({type: 'studio:loaded', tool: TOOL, token: d.token, ok: !!ok});
+      });
+      return;
+    }
+    if (d.type === 'studio:export-wav') {
+      var wav = currentWav();
+      post({type: 'studio:wav-export', tool: TOOL, token: d.token, wav: wav});
+      return;
+    }
   });
-  try{parent.postMessage({type:'studio:child-ready',tool:'sonora'},'*');}catch(e){}
+
+  // Signal readiness only after the editor's global API exists.
+  var readySent = false;
+  var timer = setInterval(function () {
+    var ok = TOOL === 'pulsegrid' ? !!window.pulsegrid : !!window.__sonora;
+    if (ok && !readySent) {
+      readySent = true;
+      clearInterval(timer);
+      setTimeout(function () { lastSig = signature(); post({type: 'studio:child-ready', tool: TOOL}); }, 300);
+    }
+  }, 150);
 })();
+
 <\/script>
 </body></html>
 `;
-  var pg=document.getElementById('pg'), so=document.getElementById('so'), stage=document.getElementById('stage');
-  var mode='split', theme='dark';
+  var pg=document.getElementById('pg'), so=document.getElementById('so');
+  var stage=document.getElementById('stage'), sel=document.getElementById('toolSel');
+  var syncEl=document.getElementById('sync'), syncText=document.getElementById('syncText');
+  var nativeTip=document.getElementById('nativeTip');
+  var mode='pulsegrid', theme='dark';
+  var sharedWav=null, sharedName='', loaded={}, ready={};
+  var exportTimer=0, syncTimer=0, wavVersion=0, lastInjected={pulsegrid:0,sonora:0}, lastExportedVersion=0;
 
-  function loadFrames(){
-    if(!pg.dataset.loaded){ pg.dataset.loaded='1'; pg.srcdoc=PG_HTML; }
-    if(!so.dataset.loaded){ so.dataset.loaded='1'; so.srcdoc=SO_HTML; }
+  function frames(){ return {pulsegrid:pg, sonora:so}; }
+  function setSync(busy,text){ syncEl.classList.toggle('busy',!!busy); syncText.textContent=text||(busy?'Syncing…':'Synced'); }
+
+  function loadFrame(tool){
+    var f=frames()[tool];
+    if(!f || f.dataset.loaded) return;
+    f.dataset.loaded='1';
+    f.srcdoc = tool==='pulsegrid' ? PG_HTML : SO_HTML;
   }
+
   function applyMode(){
-    loadFrames();
-    if(mode==='split'){ stage.className='split'; pg.classList.remove('hide'); so.classList.remove('hide'); stage.querySelector('.sep').classList.remove('hide'); }
-    else if(mode==='pulsegrid'){ stage.className=''; pg.classList.remove('hide'); so.classList.add('hide'); stage.querySelector('.sep').classList.add('hide'); }
-    else { stage.className=''; so.classList.remove('hide'); pg.classList.add('hide'); stage.querySelector('.sep').classList.add('hide'); }
-    document.querySelectorAll('#bar button[data-mode]').forEach(function(b){ b.classList.toggle('active', b.dataset.mode===mode); });
+    var isNative = mode==='native';
+    nativeTip.classList.toggle('hide', !isNative);
+    ['pulsegrid','sonora'].forEach(function(t){
+      var f=frames()[t];
+      f.classList.toggle('hide', t!==mode || isNative);
+    });
+    if(mode==='pulsegrid'||mode==='sonora'){
+      loadFrame(mode);
+      // Switching only shows a tool; audio sync happens on load / change, not on tab switch.
+    }
     pushTheme();
   }
+
+  function injectTo(tool, force){
+    if(!sharedWav) return;
+    if(!force && lastInjected[tool]===wavVersion) return; // already has this version
+    var f=frames()[tool];
+    if(!f || !f.contentWindow || !ready[tool]) return;
+    lastInjected[tool]=wavVersion;
+    setSync(true,'Loading sound…');
+    try{ f.contentWindow.postMessage({type:'studio:load-wav', wav:sharedWav, name:sharedName, token:++syncTimer},'*'); }catch(e){}
+  }
+
+  function requestExport(){
+    if(!ready[mode]) return;
+    setSync(true,'Saving sound…');
+    var f=frames()[mode];
+    try{ f.contentWindow.postMessage({type:'studio:export-wav', token:++syncTimer},'*'); }catch(e){}
+  }
+
   function setTheme(t){
     if(t!=='light'&&t!=='dark')return;
     theme=t; document.documentElement.dataset.theme=t; pushTheme();
@@ -2098,20 +2574,57 @@ return {SonoraApp};
     var msg={type:'studio:theme',theme:theme};
     try{ if(pg.contentWindow)pg.contentWindow.postMessage(msg,'*'); }catch(e){}
     try{ if(so.contentWindow)so.contentWindow.postMessage(msg,'*'); }catch(e){}
-    try{ parent.postMessage({type:'studio:theme-ack',theme:theme},'*'); }catch(e){}
   }
-  document.querySelectorAll('#bar button[data-mode]').forEach(function(b){
-    b.addEventListener('click',function(){ mode=b.dataset.mode; applyMode(); });
+
+  sel.addEventListener('change',function(){
+    mode=sel.value;
+    applyMode();
   });
-  document.getElementById('themeBtn').addEventListener('click',function(){
-    setTheme(theme==='dark'?'light':'dark');
-  });
+  document.getElementById('themeBtn').addEventListener('click',function(){ setTheme(theme==='dark'?'light':'dark'); });
+
   window.addEventListener('message',function(e){
     var d=e.data; if(!d||typeof d!=='object')return;
-    if(d.type==='studio:theme')setTheme(d.theme);
-    else if(d.type==='studio:mode'&&['split','pulsegrid','sonora'].indexOf(d.mode)>=0){ mode=d.mode; applyMode(); }
+    // From host (GUI): load the current Scratch sound into the studio.
+    if(d.type==='studio:theme'){ setTheme(d.theme); return; }
+    if(d.type==='studio:load-wav'){
+      sharedWav=d.wav; sharedName=d.name||'sound.wav'; wavVersion++;
+      // Seed every editor that is ready so they all start from the same sound.
+      if(ready.pulsegrid) injectTo('pulsegrid', true);
+      if(ready.sonora) injectTo('sonora', true);
+      return;
+    }
+    if(d.type==='studio:mode'){
+      if(['native','pulsegrid','sonora'].indexOf(d.mode)>=0){ mode=d.mode; sel.value=d.mode; applyMode(); }
+      return;
+    }
+    // From child editors.
+    if(d.type==='studio:child-ready'){
+      ready[d.tool]=true;
+      if(sharedWav) injectTo(d.tool, true);
+      return;
+    }
+    if(d.type==='studio:loaded'){
+      setSync(false,'Synced');
+      return;
+    }
+    if(d.type==='studio:changed'){
+      if(d.tool===mode){ clearTimeout(exportTimer); exportTimer=setTimeout(requestExport, 900); }
+      return;
+    }
+    if(d.type==='studio:wav-export'){
+      if(d.wav){ sharedWav=d.wav; wavVersion++; setSync(false,'Synced');
+        // Source already holds this audio; mirror it to the OTHER ready editor only.
+        lastInjected[d.tool]=wavVersion;
+        ['pulsegrid','sonora'].forEach(function(t){
+          if(t!==d.tool && ready[t]) injectTo(t, true);
+        });
+        try{ parent.postMessage({type:'studio:wav-update', wav:sharedWav},'*'); }catch(e){}
+      } else { setSync(false,'No audio'); }
+      return;
+    }
   });
-  // Follow host editor theme automatically: host sets data-gui-theme on <html>.
+
+  // Follow host editor theme automatically.
   function hostThemeIsLight(){
     try{
       var hd=window.parent.document.documentElement;
@@ -2129,9 +2642,9 @@ return {SonoraApp};
     var hd=window.parent.document.documentElement;
     new MutationObserver(syncHostTheme).observe(hd,{attributes:true,attributeFilter:['data-gui-theme','style']});
   }catch(e){}
-  // ready to host
-  try{ parent.postMessage({type:'studio:ready'},'*'); }catch(e){}
+
   applyMode();
+  try{ parent.postMessage({type:'studio:ready'},'*'); }catch(e){}
 })();
 </script>
 </body>

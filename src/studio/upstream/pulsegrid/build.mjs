@@ -25,10 +25,12 @@ async function bundle (entry, replacements = {}) {
             (_, kind, name) => { exports.push(name); return `${kind} ${name}`; });
         if (/^\s*(?:import|export)\s/m.test(source)) throw new Error(`Unsupported module syntax in ${file}`);
         for (const [p, r] of Object.entries(replacements)) source = source.split(p).join(r);
-        modules.set(file, `__modules[${JSON.stringify(file)}]=(()=>{\n${source}\nreturn {${exports.join(',')}};\n})();`);
+        const wrap = file === 'app.js' ? '(async()=>{' : '(()=>{';
+        const close = file === 'app.js' ? '})().catch(e=>{console.error(e);});' : '})();';
+        modules.set(file, `__modules[${JSON.stringify(file)}]=${wrap}\n${source}\nreturn {${exports.join(',')}};\n${close}`);
     };
     await visit(entry);
-    return `(()=>{\n'use strict';\nconst __modules=Object.create(null);\n${[...modules.values()].join('\n')}\n})();`;
+    return `(async()=>{\n'use strict';\nconst __modules=Object.create(null);\n${[...modules.values()].join('\n')}\n})().catch(e=>{console.error('Pulsegrid boot failed:',e);});`;
 }
 
 // Worklet and export worker are separate JS globals, bundled independently.
@@ -41,7 +43,7 @@ const replacements = {
 const app = await bundle('app.js', replacements);
 const css = await fs.readFile(path.join(root, 'styles.css'), 'utf8');
 let html = await fs.readFile(path.join(root, 'index.html'), 'utf8');
-html = html.replace('<link rel="stylesheet" href="styles.css">', `<style>\n${css}\n</style>`)
-    .replace('<script type="module" src="app.js"></script>', `<script type="module">\n${app.replace(/<\/script/gi, '<\\/script')}\n</script>`);
+html = html.replace('<link rel="stylesheet" href="styles.css">', () => `<style>\n${css}\n</style>`)
+    .replace('<script type="module" src="app.js"></script>', () => `<script type="module">\n${app.replace(/<\/script/gi, '<\\/script')}\n</script>`);
 await fs.writeFile('/root/.codebuddy/artifact/2f8a7d30-9c21-4f0b-1d61-c65f7b386000/audio_work/pulsegrid-standalone.html', html);
 console.log(`Built pulsegrid-standalone.html (${(Buffer.byteLength(html) / 1024).toFixed(1)} KiB)`);
