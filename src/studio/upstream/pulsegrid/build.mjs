@@ -5,7 +5,7 @@ import path from 'node:path';
 const root = '/root/.codebuddy/artifact/2f8a7d30-9c21-4f0b-1d61-c65f7b386000/audio_work/pulsegrid_src';
 const importPattern = /^import\s+\{([^}]+)\}\s+from\s+['"]([^'"]+)['"];?\s*$/gm;
 
-async function bundle (entry, replacements = {}) {
+async function bundle (entry, replacements = []) {
     const modules = new Map();
     const visit = async file => {
         file = path.posix.normalize(file);
@@ -24,7 +24,7 @@ async function bundle (entry, replacements = {}) {
         source = source.replace(/^export\s+(async\s+function|class|function|const|let|var)\s+([A-Za-z_$][\w$]*)/gm,
             (_, kind, name) => { exports.push(name); return `${kind} ${name}`; });
         if (/^\s*(?:import|export)\s/m.test(source)) throw new Error(`Unsupported module syntax in ${file}`);
-        for (const [p, r] of Object.entries(replacements)) source = source.split(p).join(r);
+        for (const [re, val] of replacements) source = source.replace(re, () => val);
         const wrap = file === 'app.js' ? '(async()=>{' : '(()=>{';
         const close = file === 'app.js' ? '})().catch(e=>{console.error(e);});' : '})();';
         modules.set(file, `__modules[${JSON.stringify(file)}]=${wrap}\n${source}\nreturn {${exports.join(',')}};\n${close}`);
@@ -36,10 +36,11 @@ async function bundle (entry, replacements = {}) {
 // Worklet and export worker are separate JS globals, bundled independently.
 const worklet = await bundle('engine/worklet.js');
 const worker = await bundle('engine/export-worker.js');
-const replacements = {
-    "new URL('./worklet.js', import.meta.url)": `URL.createObjectURL(new Blob([${JSON.stringify(worklet)}],{type:'text/javascript'}))`,
-    "new URL('./engine/export-worker.js', import.meta.url)": `URL.createObjectURL(new Blob([${JSON.stringify(worker)}],{type:'text/javascript'}))`
-};
+const blobExpr = code => `URL.createObjectURL(new Blob([${JSON.stringify(code)}],{type:'text/javascript'}))`;
+const replacements = [
+    [/new\s*URL\(\s*['"]\.\/worklet\.js['"]\s*,\s*import\.meta\.url\s*\)/g, blobExpr(worklet)],
+    [/new\s*URL\(\s*['"]\.\/engine\/export-worker\.js['"]\s*,\s*import\.meta\.url\s*\)/g, blobExpr(worker)]
+];
 const app = await bundle('app.js', replacements);
 const css = await fs.readFile(path.join(root, 'styles.css'), 'utf8');
 let html = await fs.readFile(path.join(root, 'index.html'), 'utf8');
